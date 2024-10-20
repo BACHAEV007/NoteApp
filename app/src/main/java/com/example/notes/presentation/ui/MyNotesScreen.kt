@@ -1,8 +1,10 @@
 package com.example.notes.presentation.ui
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.sp
 import com.example.notes.R
@@ -49,7 +52,8 @@ fun MyNotesScreen(
             .background(Color(0xFF1F1F1F))
     ) {
         Column (
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(horizontal = 28.dp, vertical = 60.dp)
         ){
             Row {
@@ -63,55 +67,77 @@ fun MyNotesScreen(
             Spacer(
                 modifier = Modifier.padding(16.dp)
             )
-            LazyColumn {
-                items(notesContent) { note ->
-                    Box(
-                        modifier = Modifier
-                            .background(Color(0xFF3B3B3B), RoundedCornerShape(8.dp))
-                            .padding(16.dp)
-                            .fillMaxWidth()
-                            .pointerInput(Unit) {
-                                detectTapGestures(
-                                    onLongPress = {
-                                        isHolding = true
-                                    },
-                                    onTap = {
-                                        val noteTitle = if (note.title.isBlank()) " " else note.title
-                                        val noteBody = if (note.body.isBlank()) " " else note.body
-                                        goToNoteDetailsScreen(note.id, noteTitle, noteBody)
-                                    }
-                                )
-                            }
-                    ) {
-
-                        Text(
-                            text = note.title,
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontSize = 28.sp,
-                            color = Color.White,
-                            modifier = modifier.padding(8.dp)
+            if (notesContent.isEmpty()){
+                Column(modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally)
+                    {
+                        Image(
+                            painter = painterResource(id = R.drawable.non_notes_image),
+                            contentDescription = "Нет заметок",
+                            contentScale = ContentScale.Fit,
                         )
-
-                        FloatingActionButton(
-                            onClick = { noteViewModel.deleteNote(note.id) },
-                            containerColor = Color(0xFF3B3B3B),
+                        Text(
+                            text = "No notes. Let’s fix that!",
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontSize = 22.sp
+                        )
+                }
+            }
+            else{
+                LazyColumn {
+                    items(notesContent) { note ->
+                        Box(
                             modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .size(20.dp)
+                                .background(Color(0xFF3B3B3B), RoundedCornerShape(8.dp))
+                                .padding(16.dp)
+                                .fillMaxWidth()
+                                .pointerInput(Unit) {
+                                    detectTapGestures(
+                                        onLongPress = {
+                                            isHolding = true
+                                        },
+                                        onTap = {
+                                            val noteTitle =
+                                                if (note.title.isBlank()) " " else note.title
+                                            val noteBody =
+                                                if (note.body.isBlank()) " " else note.body
+                                            goToNoteDetailsScreen(note.id, noteTitle, noteBody)
+                                        }
+                                    )
+                                }
                         ) {
+
+                            Text(
+                                text = note.title,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontSize = 28.sp,
+                                color = Color.White,
+                                modifier = modifier.padding(8.dp)
+                            )
+
+                            FloatingActionButton(
+                                onClick = { noteViewModel.deleteNote(note.id) },
+                                containerColor = Color(0xFF3B3B3B),
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .size(20.dp)
+                            ) {
                                 Icon(painter = painterResource(id = R.drawable.delete_icon),
                                     contentDescription = "Удалить заметку",
                                     tint = Color.White,
                                     modifier = Modifier.size(16.dp))
                             }
-                    }
+                        }
 
-                    Spacer(
-                        modifier = Modifier.padding(8.dp)
-                    )
+                        Spacer(
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
                 }
             }
-        }
+            }
         FloatingActionButton(
             onClick = { goToAddNoteScreen() },
             containerColor = Color(0xFF3B3B3B),
